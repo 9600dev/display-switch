@@ -1,8 +1,8 @@
-# Monitor Input Switcher
+# Display Input Switcher
 
-Allows you to switch monitor inputs from the command line, either directly, or by listening to USB connect/disconnect events
+Allows you to switch display inputs (hdmi, displayport) from the command line, either directly, or by listening to USB connect/disconnect events. Supports multiple monitors.
 
-```$ python3 monitor-switch.py```
+```$ python3 display-switch.py```
 ```
 Make sure you have enabled read/write access to i2c devices for users in the i2c group:
 
@@ -12,18 +12,56 @@ $ udevadm control --reload-rules && udevadm trigger
 
 $ sudo usermod -aG i2c $(whoami)
 
-Usage: monitor-switch.py [OPTIONS] COMMAND [ARGS]...
+
+Usage: display-switch.py [OPTIONS] COMMAND [ARGS]...
 
 Options:
   --help  Show this message and exit.
 
 Commands:
-  input-sources
   listen
-  monitor
+  show-display-parameters
+  show-usb-parameters
   switch
 ```
 
-Example: Switch to input display "Display Port 1" when keyboard is connected:
+```bash
+python display-switch.py show-display-parameters
 
-```python3 switch.py monitor --name '1-1.3:1.2' --monitor_input 0f```
+Display 1
+   I2C bus:          /dev/i2c-6
+   DRM connector:    card0-DP-2
+   Monitor:          AUS:ROG XG27UQ:LBLMQS194183
+
+Display 2
+   I2C bus:          /dev/i2c-7
+   DRM connector:    card0-DP-3
+   Monitor:          AUS:ROG XG27UQR:M7LMQS001163
+
+
+Bus ID: 6
+Feature: 60 (Input Source)
+      Values:
+         0f: DisplayPort-1
+         10: DisplayPort-2
+         11: HDMI-1
+         12: HDMI-2
+
+
+Bus ID: 7
+Feature: 60 (Input Source)
+      Values:
+         0f: DisplayPort-1
+         10: DisplayPort-2
+         11: HDMI-1
+         12: HDMI-2
+
+
+```
+
+Example: Switch both monitors to input display "DisplayPort-1" when usb hub is connected, and "DisplayPort-2" when usb hub is disconnected:
+
+```
+python display-switch.py listen --usb_sys_name 6-3 --display_inputids_connected 0f,0f --display_inputids_disconnected 10,10 --display_busids 6,7 --display_features 60,60
+```
+
